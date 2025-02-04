@@ -4,7 +4,10 @@ from .models import Product
 
 
 def product_create_view(request):
-    form = ProductForm(request.POST or None)
+    initial_data = {'title': 'Big Title', 'description':'Sirf yagnesh ki hi baten'}
+    obj = Product.objects.get(id=3)
+    form = ProductForm(request.POST or None, initial=initial_data, instance=obj)
+
     if form.is_valid():
         form.save()
         form = ProductForm()
@@ -34,8 +37,10 @@ def product_list_view(request):
 
 def product_detail_view(request, id):
     obj = get_object_or_404(Product, id=id)
+    # obj = Product.object.get(id=1)
     context = {
-        "object": obj
+        "object": obj,
+        # "title": obj.title
     }
     return render(request, "products/product_detail.html", context)
 

@@ -3,7 +3,7 @@
 {% block content %}
 <h1>About</h1>
 
-<h3>{{ title }}</h3>
+<h3>{{ title|capfirst|upper|title }}</h3>
 <p>This is a template</p>
 
 {{ my_html|safe }}
@@ -11,6 +11,26 @@
 <p>
 , {{ my_number }}
 {{ my_list }}
+
+    <ul>
+
+    {{ my_text}} {{my_number}} yagnesh is a good boy
+    {% for sub_item in my_list %}
+   {% if sub_item == 312 %}
+    <li> {{ forloop.counter }} --> {{ sub_item|add:22 }} && </li>
+    {% elif sub_item == "ABC" %}
+     <li> M ramta jogi </li>
+    {% else %}
+    <li> {{ forloop.counter }} --> {{ sub_item }} </li>
+    {% endif %}
+
+
+    {% endfor %}
+
+    </ul>
+
+
+
 </p>
 
 <ul>
