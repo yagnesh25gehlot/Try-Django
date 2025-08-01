@@ -1,5 +1,5 @@
 #       Python Notes
-
+# import psycopg2
 
 a = ["a", "b", "c"]
 a.append("e")
@@ -10,7 +10,9 @@ print("-->".join(a))
 '''
 Global Interpretor Lock:
 
-1.The Global Interpreter Lock (GIL) is a mechanism in CPython (the default Python implementation) that ensures only one thread executes Python bytecode at a time, even on multi-core processors. This means Python threads are not truly parallel when executing CPU-bound tasks.
+1.The Global Interpreter Lock (GIL) is a mechanism in CPython (the default Python implementation) that ensures only one 
+thread executes Python bytecode at a time, even on multi-core processors. This means Python threads are not truly
+ parallel when executing CPU-bound tasks.
 2. To avoid GIL we should multi processing instead of multithreading
 3. In multithreaded envioronment GIL creates the bottel neck, means thread sare not parallel in python.
 '''
@@ -634,6 +636,205 @@ for i in a:
 
 for i in b:
     print(-1*i, end="ma")
+
+
+entries = ['yes' for x in range(0,20) if x%2 == 0]
+print(entries)
+
+entries = [ 'yes' if x%2==0 else 'no' for x in range(0,10)]
+print(entries)
+
+entries = ('yes' for x in range(0,3) if x%2==0)
+print(entries)
+print(next(entries))
+print(next(entries))
+entries = {'yes' for x in range(0,3) if x%2==0}
+print(entries)
+user = {'a':'b', 'c':'d'}
+entries = {x:y for x,y in user.items()}
+print(entries)
+
+try:
+    v = ""
+    # with open('README.md','w') as file:
+    #     file.write("Hellow world \n")
+    with open('README.md','a') as file:
+        file.write("Hellow world \n")
+    with open('README.md','r') as file:
+        v = file.read()
+        print(v)
+        print(str(v))
+except (KeyError, ValueError) as e:
+    print('first', e)
+except Exception as e:
+    print('second',e)
+else:
+    print('third')
+finally:
+    print('fourth')
+
+'''custom exception class'''
+
+class NetworkException(Exception):
+    def __init__(self, message=None, debug=None):
+        super().__init__(self, message)
+        self.message = message
+        self.debug = debug
+
+try:
+    raise ('some problem in network')
+except (NetworkException) as e:
+    print(e.__class__)
+    print(e)
+
+
+
+from threading import Thread
+from multiprocessing import Process, Queue
+import time
+
+
+queue = Queue()
+
+def fun1(q):
+    for i in range(0,5):
+        t1 = time.time()
+        try:
+            value = q.get(timeout=5)  # Get value with timeout
+            print('Waiting finished for fun1 after', (time.time()-t1), value)
+        except Exception as e:
+            print("Queue is empty, fun1 timeout!")
+        time.sleep(1)
+def fun2(q):
+    for i in range(0,5):
+        time.sleep(1.5)
+        q.put('fun2')  # Fix: Use put() instead of add()
+        print('Value added by fun2')
+
+
+
+# t1 = Thread(target = fun1, args=(2,), daemon=True,name='t1')
+# t2 = Thread(target = fun2, args=(2,), daemon=True,name='t2')
+
+
+# if __name__ == '__main__':
+#     t1 = Process(target = fun1, args=(queue,), daemon=True,name='t1')
+#     t2 = Process(target = fun2, args=(queue,), daemon=True,name='t2')
+#
+#     t1.start()
+#     t2.start()
+#
+#     t1.join()
+#     t2.join()
+
+
+''' acyncio --> corotunes , best for networking, db calls, socket programming .. better than
+threading, just stop the thread. dont hold the thread just wait the current process to complete
+meanwhile other functions or courutines can work 
+'''
+
+import asyncio
+import aiohttp
+
+cntt = 0
+
+async def fun1():
+    print('function-1 started')
+    global cntt
+    await asyncio.sleep(2)
+    print('function-1 finished', cntt)
+    cntt = cntt + 1
+
+async def fun2():
+    print('function-2 started')
+    global cntt
+    await asyncio.sleep(2)
+    print('function-2 finished', cntt)
+    cntt = cntt + 1
+
+
+async def http_caller(session, url):
+    async with session.get(url) as response:
+        res = await response.json()
+        res = 'get the result'
+        return res
+
+
+
+async def main1():
+    # li = [fun1(), fun2()]
+    async with aiohttp.ClientSession() as session:
+        tasks = [http_caller(session, 'https://jsonplaceholder.typicode.com/posts') for _ in range(0,4)]
+        tasks = await asyncio.gather(*tasks)
+        print(tasks)
+
+    # await asyncio.gather(*li)
+    # print('before finally!!')
+
+asyncio.run(main1())
+print('finaly!!')
+
+
+'''Flask basics'''
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+li = []
+
+@app.route('/home/*', methods=["GET"])
+def task1():
+    target = "ok"
+    value = [{"yagnesh": li}, {"target":target}]
+    return jsonify(value),200
+
+@app.route('/homes/<job_id>', methods=["POST"])
+def task2(job_id):
+    global li
+    li.append(job_id)
+
+    re = request.get_json()
+    li.append(re)
+    print(re)
+
+    re = request.args.to_dict()
+    print(re)
+    li.append(re)
+
+    value = {"yagnesh": "sucess", "target":"ok"}
+    return jsonify(value)
+
+
+async def call_test_endpoint():
+    url = "http://127.0.0.1:5010/home/*"  # Flask server URL
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url) as response:
+                response.raise_for_status()  # Raise an error for HTTP 4xx/5xx
+                return await response.json()  # Return JSON response
+        except aiohttp.ClientError as e:
+            return {"error": str(e)}  # Handle exceptions
+
+# Run the async function
+async def main():
+    result = await call_test_endpoint()
+    print(result)
+
+
+if __name__ == '__main__':
+    app.run("0.0.0.0", 5010,debug=True)
+    Thread(target=main)
+
+
+
+
+
+
+
+
+
+
 
 
 

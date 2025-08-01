@@ -74,6 +74,7 @@ print(a.find("Gehlot"), a.upper(), a.lower(), ('a' in a))
 a = "Yagn//esh G//ehlot"
 b = a.split(" ") # or by / no issue in it
 print(b)
+# .strip()
 
 
 
@@ -96,7 +97,11 @@ a[0]=72
 a[1]='kadar khan'
 print(a[1:4:2], a[len(a)-1])
 a=["ram", "nom", "japa", "karo", "rau"]
-a= sorted( a, key = lambda x: (len(x), x[len(x)-1], -ord(x[len(x)-1]), x )) # all conditions in tuple
+a= sorted( a, key = lambda x: (len(x), x[len(x)-1], -ord(x[len(x)-1]), x ), reverse=False) # all conditions in tuple
+
+
+# a= sorted(a, key= lambda x: (x, len(x)))
+
 print(a)
 print(ord("A")) # gives unicode
 a.clear()
@@ -206,7 +211,7 @@ a = random.randint(1, 100)
 print(a)
 a = random.uniform(100.5, 2000.3)
 print(a)
-a = int(input("give your input here"))
+# a = int(input("give your input here"))
 print(a)
 
 
